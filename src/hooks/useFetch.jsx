@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 
 async function fetchFn(url, method = "GET", body, signal) {
   const config = {
@@ -22,10 +22,14 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, 
   // Abortion controller for fetch cancellation
   const controller = useMemo(() => new AbortController(), []);
 
+  const onMutateRef = useRef(onMutate);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+
 
   const fetchData = useCallback(async (params = {}, ctx = null) => {
     const { url, method = "GET", body } = params;
-	const mutateResult = onMutate && onMutate(body, ctx);
+	const mutateResult = onMutateRef.current && onMutateRef.current(body, ctx);
     const { mutatedBody, extraCtx } = mutateResult || { mutatedBody: body, extraCtx: {} };
 
     try {
@@ -34,15 +38,21 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, 
       const result = await fetchFn(url, method, mutatedBody);
       setData(result);
 
-      onSuccess && onSuccess(result, mutatedBody, { ...ctx, ...extraCtx });
+      onSuccessRef.current && onSuccessRef.current(result, mutatedBody, { ...ctx, ...extraCtx });
     } catch (error) {
       if (error.name !== 'AbortError') {
         setError(error);
-        onError && onError(error, mutatedBody, { ...ctx, ...extraCtx });
+        onErrorRef.current && onErrorRef.current(error, mutatedBody, { ...ctx, ...extraCtx });
       }
     } finally {
       setIsLoading(false);
     }
+  }, [/*onMutate, onSuccess, onError*/]);
+
+  useEffect(() => {
+    onMutateRef.current = onMutate;
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
   }, [onMutate, onSuccess, onError]);
 
   useEffect(() => {
