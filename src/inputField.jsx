@@ -1,9 +1,9 @@
 import { Typography } from "@mui/material"
-import { useState } from 'react'
 import { TextField, Select } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 
+// eslint-disable-next-line react/prop-types
 export default function InputField({ control, errors, title, type = "text", children }) {
 
 	const inputType = (field) => {
@@ -40,7 +40,7 @@ export default function InputField({ control, errors, title, type = "text", chil
 				name={title}
 				control={control}
 				defaultValue=""
-				rules={{ required: 'First name required'}}
+				rules={{ required: 'First name required' }}
 				render={({ field }) => (
 					<>{inputType(field)}</>
 				)}
