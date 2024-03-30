@@ -13,8 +13,8 @@ async function fetchFn(url, method = "GET", body, signal) {
   return response.json();
 }
 
-function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, autoFetch: false }) {
-  const { onMutate, onSuccess, onError, autoFetch } = callbacks;
+function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, autoFetch: false, fetchUrl: null }) {
+  const { onMutate, onSuccess, onError, autoFetch, fetchUrl } = callbacks;
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +23,7 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, 
   const controller = useMemo(() => new AbortController(), []);
 
 
-  const fetchData = useCallback(async (params, ctx = null) => {
+  const fetchData = useCallback(async (params = {}, ctx = null) => {
     const { url, method = "GET", body } = params;
 	const mutateResult = onMutate && onMutate(body, ctx);
     const { mutatedBody, extraCtx } = mutateResult || { mutatedBody: body, extraCtx: {} };
@@ -31,7 +31,7 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, 
     try {
       setIsLoading(true);
       setError(null); // Reset error state before a new request
-      const result = await fetchFn(url, method, mutatedBody, controller.signal);
+      const result = await fetchFn(url, method, mutatedBody);
       setData(result);
 
       onSuccess && onSuccess(result, mutatedBody, { ...ctx, ...extraCtx });
@@ -43,16 +43,15 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, 
     } finally {
       setIsLoading(false);
     }
-  }, [onMutate, onSuccess, onError, controller.signal]);
+  }, [onMutate, onSuccess, onError]);
 
   useEffect(() => {
-	autoFetch && fetchData();
-  }, [autoFetch, fetchData]);
+	autoFetch && fetchData({ url: fetchUrl });
+  }, [autoFetch, fetchData, fetchUrl]);
 
   useEffect(() => {
 	return () => controller.abort();
   }, [controller]);
-
 
   return { data, error, isLoading, fetchData };
 }
