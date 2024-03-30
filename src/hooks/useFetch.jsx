@@ -13,8 +13,8 @@ async function fetchFn(url, method = "GET", body, signal) {
   return response.json();
 }
 
-function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null }) {
-  const { onMutate, onSuccess, onError } = callbacks;
+function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, autoFetch: false }) {
+  const { onMutate, onSuccess, onError, autoFetch } = callbacks;
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,6 +47,10 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null }
       setIsLoading(false);
     }
   }, [onMutate, onSuccess, onError, controller.signal]);
+
+  useEffect(() => {
+	autoFetch && fetchData();
+  }, [autoFetch, fetchData]);
 
   useEffect(() => {
 	return () => controller.abort();
