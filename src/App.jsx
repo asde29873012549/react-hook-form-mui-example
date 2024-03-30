@@ -5,6 +5,11 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import './App.css'
 import useFetch from './hooks/useFetch'
+// import * as z from 'zod'
+
+// const schema = z.object({
+// 	designer: z.number(),
+// })
 
 function App() {
 	const { control, handleSubmit, formState: { errors } } = useForm({
@@ -15,8 +20,8 @@ function App() {
 
 	const { data, isLoading, fetchData } = useFetch({
 		onMutate: (body, ctx) => {
+			//schema.parse(body)
 			console.log(body, ctx)
-			return { body, extraCtx: { extra: "extra" } }
 		},
 		onSuccess: (res, body, ctx) => {
 			console.log(res, body, ctx, count)
@@ -24,8 +29,8 @@ function App() {
 		onError: (error) => {
 			console.log(error)
 		},
-		autoFetch: true,
-		fetchUrl: 'http://localhost:8080/designer?limit=10'
+		// autoFetch: true,
+		// fetchUrl: 'http://localhost:8080/designer?limit=10'
 	});
 
 
@@ -35,8 +40,6 @@ function App() {
 			url: `http://localhost:8080/designer?keyword=${data.designer}&limit=10`,
 		}, { numLevel: 1 })
 	};
-
-	console.log("rerender")
 
   return (
 	<LocalizationProvider dateAdapter={AdapterDayjs}>

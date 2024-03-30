@@ -29,10 +29,11 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, 
 
   const fetchData = useCallback(async (params = {}, ctx = null) => {
     const { url, method = "GET", body } = params;
-	const mutateResult = onMutateRef.current && onMutateRef.current(body, ctx);
-    const { mutatedBody, extraCtx } = mutateResult || { mutatedBody: body, extraCtx: {} };
 
     try {
+      const mutateResult = onMutateRef.current && onMutateRef.current(body, ctx);
+      const { mutatedBody, extraCtx } = mutateResult || { mutatedBody: body, extraCtx: {} };
+	
       setIsLoading(true);
       setError(null); // Reset error state before a new request
       const result = await fetchFn(url, method, mutatedBody);
@@ -42,12 +43,12 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, 
     } catch (error) {
       if (error.name !== 'AbortError') {
         setError(error);
-        onErrorRef.current && onErrorRef.current(error, mutatedBody, { ...ctx, ...extraCtx });
+        onErrorRef.current && onErrorRef.current(error);
       }
     } finally {
       setIsLoading(false);
     }
-  }, [/*onMutate, onSuccess, onError*/]);
+  }, []);
 
   useEffect(() => {
     onMutateRef.current = onMutate;
