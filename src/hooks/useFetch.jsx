@@ -33,15 +33,12 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, 
       setError(null); // Reset error state before a new request
       const result = await fetchFn(url, method, mutatedBody, controller.signal);
       setData(result);
-      if (onSuccess) {
-        onSuccess(result, mutatedBody, { ...ctx, ...extraCtx });
-      }
+
+      onSuccess && onSuccess(result, mutatedBody, { ...ctx, ...extraCtx });
     } catch (error) {
       if (error.name !== 'AbortError') {
         setError(error);
-        if (onError) {
-          onError(error, mutatedBody, { ...ctx, ...extraCtx });
-        }
+        onError && onError(error, mutatedBody, { ...ctx, ...extraCtx });
       }
     } finally {
       setIsLoading(false);
