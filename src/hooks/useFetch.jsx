@@ -31,12 +31,12 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, 
     const { url, method = "GET", body } = params;
 
     try {
-      const mutateResult = onMutateRef.current && onMutateRef.current(body, ctx);
+      const mutateResult = onMutateRef.current && await onMutateRef.current(body, ctx);
       const { mutatedBody, extraCtx } = mutateResult || { mutatedBody: body, extraCtx: {} };
 	
       setIsLoading(true);
       setError(null); // Reset error state before a new request
-      const result = await fetchFn(url, method, mutatedBody);
+      const result = await fetchFn(url, method, mutatedBody, controller.signal);
       setData(result);
 
       onSuccessRef.current && onSuccessRef.current(result, mutatedBody, { ...ctx, ...extraCtx });
@@ -48,7 +48,7 @@ function useFetch(callbacks = { onMutate: null, onSuccess: null, onError: null, 
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [controller.signal]);
 
   useEffect(() => {
     onMutateRef.current = onMutate;
